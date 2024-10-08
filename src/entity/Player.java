@@ -23,6 +23,8 @@ public class Player extends Entity {
         screenX = gp.screenWidth/2 - (gp.tileSize/2);
         screenY = gp.screenHeight/2 - (gp.tileSize/2);
 
+        solidArea = new Rectangle(9, 21, 30, 23); //PLAYER COLLISION AREA
+
         setDefaultValues();
         getPlayerImage();
     }
@@ -46,46 +48,49 @@ public class Player extends Entity {
             right1 = ImageIO.read(getClass().getResourceAsStream("/player/boy_right_1.png"));
             right2 = ImageIO.read(getClass().getResourceAsStream("/player/boy_right_2.png"));
 
-
-
         }catch(IOException e){
             e.printStackTrace();
         }
     }
 
-    public void update(){
-        if(keyH.upPressed){
-            direction = "up";
-            worldY -= speed;
-            spriteCounter++;
-        }
-        else if(keyH.downPressed){
-            direction = "down";
-            worldY += speed;
-            spriteCounter++;
-        }
-        else if(keyH.leftPressed){
-            direction = "left";
-            worldX -= speed;  
-            spriteCounter++;
-        }
-        else if(keyH.rightPressed){
-            direction = "right";
-            worldX += speed;
-            spriteCounter++;
+    public void update() {
+        boolean isMoving = false;
+    
+        if (keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed) {
+            if (keyH.upPressed) {
+                direction = "up";
+            } else if (keyH.downPressed) {
+                direction = "down";
+            } else if (keyH.leftPressed) {
+                direction = "left";
+            } else if (keyH.rightPressed) {
+                direction = "right";
+            }
+
+            //CHECK TILE COLLISION
+            collisionOn = false;
+            gp.colChecker.checkTile(this);
+
+            if(!collisionOn){
+                switch(direction){
+                    case "up" : worldY -= speed; break;
+                    case "down" : worldY += speed; break;
+                    case "left" : worldX -= speed; break;
+                    case "right" : worldX += speed; break;
+
+                }
+            }
             
+    
+            spriteCounter++;
+            isMoving = true;
         }
-        
-        if(spriteCounter > 10){
-            if(spriteNum == 1){
-                spriteNum = 2;
-            }
-            else if(spriteNum == 2){
-                spriteNum = 1;
-            }
+    
+        if (isMoving && spriteCounter > 10) {
+            spriteNum = (spriteNum == 1) ? 2 : 1;
             spriteCounter = 0;
         }
-    }
+    }    
 
     public void draw(Graphics2D g2){
         // g2.setColor(Color.white);
