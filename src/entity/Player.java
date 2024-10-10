@@ -5,6 +5,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
+import java.awt.Rectangle;
 
 import main.GamePanel;
 import main.KeyHandler;
@@ -15,6 +16,7 @@ public class Player extends Entity {
 
     public final int screenX;
     public final int screenY;
+    int hasKey = 0;
 
     public Player(GamePanel gp, KeyHandler keyH){
         this.gp = gp;
@@ -24,6 +26,9 @@ public class Player extends Entity {
         screenY = gp.screenHeight/2 - (gp.tileSize/2);
 
         solidArea = new Rectangle(9, 21, 30, 23); //PLAYER COLLISION AREA
+        solidAreaDefaultX = solidArea.x;
+        solidAreaDefaultY = solidArea.y;
+
 
         setDefaultValues();
         getPlayerImage();
@@ -71,6 +76,10 @@ public class Player extends Entity {
             collisionOn = false;
             gp.colChecker.checkTile(this);
 
+            // CHECK OBJECT COLLISION
+            int objIndex = gp.colChecker.checkObject(this, true);
+            pickUpObject(objIndex);
+
             if(!collisionOn){
                 switch(direction){
                     case "up" : worldY -= speed; break;
@@ -91,6 +100,27 @@ public class Player extends Entity {
             spriteCounter = 0;
         }
     }    
+
+    public void pickUpObject(int i){
+        if(i != 999){
+            String objectName = gp.obj[i].name;
+
+            switch(objectName){
+                case "key":
+                    hasKey++;
+                    gp.obj[i] = null;
+                    System.out.println("Key " + hasKey);
+                    break;
+                case "door":
+                    if(hasKey > 0){
+                        gp.obj[i] = null;
+                        hasKey--;
+                        System.out.println("Key " + hasKey);
+                    }
+                    break;
+            }
+        }
+    }
 
     public void draw(Graphics2D g2){
         // g2.setColor(Color.white);
