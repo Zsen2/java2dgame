@@ -1,5 +1,6 @@
 package main;
 
+import object.OBJ_Boots;
 import object.OBJ_Chest;
 import object.OBJ_Door;
 import object.OBJ_Key;
@@ -20,6 +21,8 @@ public class AssetSetter {
         addObj(new OBJ_Door(), 8, 28);
         addObj(new OBJ_Door(), 12, 22);
         addObj(new OBJ_Chest(), 10, 7);
+        addObj(new OBJ_Boots(), 37, 42);
+
     }
 
     public void addObj(SuperObject obj, int col, int row) {
