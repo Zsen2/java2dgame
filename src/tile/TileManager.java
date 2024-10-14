@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import javax.imageio.ImageIO;
 
 import main.GamePanel;
+import main.UtilityTool;
 
 public class TileManager {
     GamePanel gp;
@@ -28,20 +29,23 @@ public class TileManager {
 
     public void getTileImage() {
         try {
-            createTile(0, "/tiles/002.png", false); // grass
-            createTile(1, "/tiles/032.png", true);  // wall
-            createTile(2, "/tiles/019.png", true);  // running water
-            createTile(3, "/tiles/017.png", false); // dirt
-            createTile(4, "/tiles/016.png", true);  // tree
-            createTile(5, "/tiles/003.png", false); // sand
+            createTile(0, "002", false); // grass
+            createTile(1, "032", true);  // wall
+            createTile(2, "019", true);  // running water
+            createTile(3, "017", false); // dirt
+            createTile(4, "016", true);  // tree
+            createTile(5, "003", false); // sand
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
     
-    private void createTile(int index, String imagePath, boolean collision) throws IOException {
+    private void createTile(int index, String imageName, boolean collision) throws IOException {
+        UtilityTool uTool = new UtilityTool();
+
         tile[index] = new Tile();
-        tile[index].image = ImageIO.read(getClass().getResourceAsStream(imagePath));
+        tile[index].image = ImageIO.read(getClass().getResourceAsStream("/tiles/" + imageName + ".png"));
+        tile[index].image = uTool.scaleImage(tile[index].image, gp.tileSize, gp.tileSize);
         tile[index].collision = collision;
     }
     
@@ -92,7 +96,7 @@ public class TileManager {
                 if (worldCol < gp.maxWorldCol && worldRow < gp.maxWorldRow) {
                    
                     int tileNum = mapTileNum[worldCol][worldRow];
-                    g2.drawImage(tile[tileNum].image, screenX, screenY, gp.tileSize, gp.tileSize, null);
+                    g2.drawImage(tile[tileNum].image, screenX, screenY, null);
                 } else {
                     g2.setColor(Color.BLACK);  
                     g2.fillRect(screenX, screenY, gp.tileSize, gp.tileSize); 
