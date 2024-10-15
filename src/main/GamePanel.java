@@ -37,7 +37,7 @@ public class GamePanel extends JPanel implements Runnable{
 
     //SYSTEM
     TileManager tileM = new TileManager(this);
-    KeyHandler keyH = new KeyHandler(this);
+    public KeyHandler keyH = new KeyHandler(this);
     Thread gameThread;
     public CollisionChecker colChecker = new CollisionChecker(this);
     public AssetSetter aSetter = new AssetSetter(this);
@@ -52,8 +52,10 @@ public class GamePanel extends JPanel implements Runnable{
 
     // GAME STATE
     public int gameState;
+    public final int titleState = 0;
     public final int playState = 1;
     public final int pauseState = 2;
+    public final int dialogueState = 3;
 
     public GamePanel(){
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
@@ -66,8 +68,7 @@ public class GamePanel extends JPanel implements Runnable{
     public void setupGame(){
         aSetter.setObject();
         aSetter.setNPC();
-        playMusic(0);
-        gameState = playState;
+        gameState = titleState;
     }
 
     public void startGameThread(){
@@ -130,26 +131,31 @@ public class GamePanel extends JPanel implements Runnable{
         if(keyH.checkDrawTime){
             drawStart = System.nanoTime();
         }
-
-        tileM.draw(g2);
-
-        for(SuperObject obj : obj){
-            if(obj != null){
-                obj.draw(g2, this);
-            }
+        // TITLE SCREEN
+        if(gameState == titleState){
+            ui.draw(g2);
         }
+        else{
+            tileM.draw(g2);
 
-        // NPC
-        for(Entity npc : npc){
-            if(npc != null){
-                npc.draw(g2);
+            for(SuperObject obj : obj){
+                if(obj != null){
+                    obj.draw(g2, this);
+                }
             }
+    
+            // NPC
+            for(Entity npc : npc){
+                if(npc != null){
+                    npc.draw(g2);
+                }
+            }
+    
+            // PLAYER
+            player.draw(g2);
+    
+            ui.draw(g2);
         }
-
-        // PLAYER
-        player.draw(g2);
-
-        ui.draw(g2);
 
         // DEBUG
         if(keyH.checkDrawTime){

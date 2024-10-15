@@ -4,6 +4,7 @@ import main.GamePanel;
 import java.util.Random;
 
 public class NPC_OldMan extends Entity{
+    Random random = new Random();
 
     public NPC_OldMan(GamePanel gp){
         super(gp);
@@ -11,6 +12,7 @@ public class NPC_OldMan extends Entity{
         direction = "down";
         speed = 1;
         getImage();
+        setDialogue();
     }
 
     public void getImage(){
@@ -24,11 +26,27 @@ public class NPC_OldMan extends Entity{
         right2 = setup("/npc/oldman_right_2");
     }
 
+    public void setDialogue(){
+        addDialogue("Hello, lad.");
+        addDialogue("So you've come to this island to#find the treasure?");
+        addDialogue("I used to be a great wizard but now...#I'm a bit too old for taking an adventure.");
+        addDialogue("Well, goodluck nalng nimo.");
+
+    }
+
+    public void addDialogue(String dialogue){
+        for(int i = 0; i < dialogues.length; i++){
+            if(dialogues[i] == null){
+                dialogues[i] = dialogue;
+                break;
+            }
+        }
+    }
+
     public void move() {
         actionLockCounter++;
     
-        if (actionLockCounter >= 120) {
-            Random random = new Random();
+        if (actionLockCounter >= 120) { 
     
             int i = random.nextInt(100) + 1;
     
@@ -48,6 +66,10 @@ public class NPC_OldMan extends Entity{
     
             actionLockCounter = 0;
         }
+    }
+
+    public void speak(){
+        super.speak();
     }
     
 
