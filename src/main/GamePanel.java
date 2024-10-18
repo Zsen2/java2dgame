@@ -6,11 +6,14 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 
 import javax.swing.JPanel;
-
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import entity.Entity;
 import entity.Player;
-import object.SuperObject;
 import tile.TileManager;
+import java.util.ArrayList;
 
 public class GamePanel extends JPanel implements Runnable{
 
@@ -44,11 +47,14 @@ public class GamePanel extends JPanel implements Runnable{
     Sound music = new Sound();
     Sound se = new Sound();
     public UI ui = new UI(this);
+    public EventHandler eHandler = new EventHandler(this);
 
     //ENTITY OBJECT
     public Player player = new Player(this, keyH);
-    public SuperObject obj[] = new SuperObject[10];
     public Entity npc[] = new Entity[10];
+    public Entity obj[] = new Entity[10];
+    public Entity monster[] = new Entity[20];
+    ArrayList<Entity> entityList = new ArrayList<>();
 
     // GAME STATE
     public int gameState;
@@ -68,6 +74,7 @@ public class GamePanel extends JPanel implements Runnable{
     public void setupGame(){
         aSetter.setObject();
         aSetter.setNPC();
+        aSetter.setMonster();
         gameState = titleState;
     }
 
@@ -116,6 +123,11 @@ public class GamePanel extends JPanel implements Runnable{
                 }
             }
         }
+        for(Entity monster : monster){
+            if(monster != null){
+                monster.update();
+            }
+        }
         if(gameState == pauseState){
 
         }
@@ -138,21 +150,25 @@ public class GamePanel extends JPanel implements Runnable{
         else{
             tileM.draw(g2);
 
-            for(SuperObject obj : obj){
-                if(obj != null){
-                    obj.draw(g2, this);
-                }
-            }
+            entityList.add(player);
     
-            // NPC
-            for(Entity npc : npc){
-                if(npc != null){
-                    npc.draw(g2);
-                }
-            }
+            // ADD NPC
+            entityList.addAll(Arrays.stream(npc).filter(e -> e != null).collect(Collectors.toList()));
+            // ADD OBJ
+            entityList.addAll(Arrays.stream(obj).filter(e -> e != null).collect(Collectors.toList()));
+            // ADD MONSTER
+            entityList.addAll(Arrays.stream(monster).filter(e -> e != null).collect(Collectors.toList()));
     
-            // PLAYER
-            player.draw(g2);
+            // Sort entities based on Y-coordinate (render order)
+            Collections.sort(entityList, Comparator.comparingInt(e -> e.worldY));
+
+            // DRAW ENTITIES
+            for (Entity entity : entityList) {
+                entity.draw(g2);
+            }
+
+            // EMPTY LIST
+            entityList.clear();
     
             ui.draw(g2);
         }

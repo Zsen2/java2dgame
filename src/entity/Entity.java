@@ -4,6 +4,8 @@ import java.awt.image.BufferedImage;
 
 import main.GamePanel;
 import main.UtilityTool;
+import monster.MON_GreenSlime;
+
 import javax.imageio.ImageIO;
 import java.awt.Graphics2D;
 
@@ -16,7 +18,7 @@ public abstract class Entity {
     public int speed;
 
     public BufferedImage up1, up2, down1, down2, left1, left2, right1, right2;
-    public String direction;
+    public String direction = "down";
 
     public int spriteCounter = 0;
     public int spriteNum = 1;
@@ -24,14 +26,23 @@ public abstract class Entity {
     public int solidAreaDefaultX, solidAreaDefaultY;
     public boolean collisionOn =false;
     public int actionLockCounter = 0;
+    public boolean invincible = false;
+    public int invincibleCounter = 0;
     String dialogues[] = new String[20];
     int dialogueIndex =0;
+    public BufferedImage image, image2, image3;
+    public String name;
+    public boolean collision = false;
+
+    // CHARACTER STATUS
+    public int maxLife;
+    public int life;
 
     public Entity(GamePanel gp){
         this. gp = gp;
     }
 
-    public abstract void move();
+    public void move(){}
     public void speak(){
         if(dialogues[dialogueIndex] == null){
             dialogueIndex = 0;
@@ -60,7 +71,16 @@ public abstract class Entity {
         collisionOn = false;
         gp.colChecker.checkTile(this);
         gp.colChecker.checkObject(this, false);
-        gp.colChecker.checkPlayer(this);
+        boolean contactPlayer = gp.colChecker.checkPlayer(this);
+        gp.colChecker.checkEntity(this,  gp.npc);
+        gp.colChecker.checkEntity(this,  gp.monster);
+
+        if(this instanceof MON_GreenSlime && contactPlayer){
+            if(!gp.player.invincible){
+                gp.player.life -= 1;
+                gp.player.invincible = true;    
+            }
+        }
 
         if (!collisionOn) {
             switch (direction) {

@@ -2,7 +2,8 @@ package main;
 
 import entity.Entity;
 import entity.NPC_OldMan;
-import object.SuperObject;
+import monster.MON_GreenSlime;
+import object.OBJ_Door;
 
 public class AssetSetter {
     GamePanel gp;
@@ -16,23 +17,57 @@ public class AssetSetter {
 
     }
 
-    public void addObj(SuperObject obj, int col, int row) {
-       
-    }
-
     public void setNPC(){
         addNPC(new NPC_OldMan(gp), 21, 21);
     }
+
+    public void setMonster(){
+        addMonster(new MON_GreenSlime(gp), 23, 36);
+        addMonster(new MON_GreenSlime(gp), 23, 37);
+    }
  
-    public void addNPC(Entity npc, int col, int row){
-        for (int i = 0; i < gp.npc.length; i++) {
-            if (gp.npc[i] == null) {
-                gp.npc[i] = npc;
-                gp.npc[i].worldX = col * gp.tileSize;
-                gp.npc[i].worldY = row * gp.tileSize;
-                break;
+
+    public void addObj(Entity obj, int col, int row) {
+        int worldX = col * gp.tileSize;
+        int worldY = row * gp.tileSize;
+    
+        for (int i = 0; i < gp.obj.length; i++) {
+            if (gp.obj[i] == null) {
+                obj.worldX = worldX;
+                obj.worldY = worldY;
+                gp.obj[i] = obj; 
+                return;
             }
         }
     }
+    
+    public void addNPC(Entity npc, int col, int row){
+        int worldX = col * gp.tileSize;
+        int worldY = row * gp.tileSize;
+    
+        for (int i = 0; i < gp.npc.length; i++) {
+            if (gp.npc[i] == null) {
+                npc.worldX = worldX;
+                npc.worldY = worldY;
+                gp.npc[i] = npc; 
+                return;
+            }
+        }
+    }
+
+    public void addMonster(Entity monster, int col, int row){
+        int worldX = col * gp.tileSize;
+        int worldY = row * gp.tileSize;
+    
+        for (int i = 0; i < gp.monster.length; i++) {
+            if (gp.monster[i] == null) {
+                monster.worldX = worldX;
+                monster.worldY = worldY;
+                gp.monster[i] = monster; 
+                return;
+            }
+        }
+    }
+    
 
 }

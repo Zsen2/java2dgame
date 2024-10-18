@@ -52,16 +52,12 @@ public class NPC_OldMan extends Entity{
     
             if (i <= 25) {
                 direction = "up";
-                System.out.println("up");
             } else if (i <= 50) {
                 direction = "down";
-                System.out.println("down");
             } else if (i <= 75) {
                 direction = "left";
-                System.out.println("left");
             } else {
                 direction = "right";
-                System.out.println("right");
             }
     
             actionLockCounter = 0;

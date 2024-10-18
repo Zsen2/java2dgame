@@ -4,7 +4,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import java.awt.Rectangle;
-
+import java.awt.AlphaComposite;
 import main.GamePanel;
 import main.KeyHandler;
 
@@ -13,6 +13,7 @@ public class Player extends Entity {
 
     public final int screenX;
     public final int screenY;
+    public int damageCooldown = 0;
 
     public Player(GamePanel gp, KeyHandler keyH){
 
@@ -36,6 +37,10 @@ public class Player extends Entity {
         worldY = gp.tileSize * 21;
         speed = 4;
         direction = "down";
+
+        // PLAYER STATUS
+        maxLife = 6;
+        life = maxLife;
     }
 
     public void getPlayerImage(){
@@ -75,12 +80,20 @@ public class Player extends Entity {
             int objIndex = gp.colChecker.checkObject(this, true);
             pickUpObject(objIndex);
 
+            // CHECK MONSTER COLLISION
+            int monsterIndex = gp.colChecker.checkEntity(this, gp.monster);
+            contactMonster(monsterIndex);
+
+            gp.eHandler.checkEvent();
+
+            gp.keyH.spacePressed = false;
+
             if (!collisionOn) {
                 switch (direction) {
-                    case "up": worldY -= speed; break;
-                    case "down": worldY += speed; break;
-                    case "left": worldX -= speed; break;
-                    case "right": worldX += speed; break;
+                    case "up" -> worldY -= speed;
+                    case "down" -> worldY += speed;
+                    case "left" -> worldX -= speed;
+                    case "right"->  worldX += speed;
                 }
             }
         }
@@ -89,9 +102,26 @@ public class Player extends Entity {
         }
     }
 
+    public void contactMonster(int i) {
+        if(i != 999){
+            if(!invincible){
+                life -= 1;
+                invincible = true;
+            }
+        }
+    }
+
     @Override
     public void update() {
-        move();  
+        move(); 
+
+        if(invincible){
+            invincibleCounter++;
+            if(invincibleCounter > 60){
+                invincible = false;
+                invincibleCounter =0 ;
+            }
+        }
 
         spriteCounter++;
         if (spriteCounter > 10) {
@@ -112,7 +142,7 @@ public class Player extends Entity {
                 gp.gameState = gp.dialogueState;
                 gp.npc[i].speak();
             }
-            gp.keyH.spacePressed = false;
+            
         }
         
     }
@@ -138,6 +168,13 @@ public class Player extends Entity {
                 break;
         }
 
+        if(invincible){
+            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f));
+        }
+
         g2.drawImage(image, screenX, screenY, null);
+
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+
     }
 }

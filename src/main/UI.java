@@ -6,11 +6,14 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
+import entity.Entity;
+import object.OBJ_Heart;
+
 public class UI {
     GamePanel gp;
     Graphics2D g2;
     Font arial_40, arial_80B;
-    BufferedImage keyImage;
+    BufferedImage keyImage, heart_full, heart_half, heart_blank;
     public boolean messageOn = false;
     public String message = "";
     int messageCounter = 0;
@@ -26,7 +29,15 @@ public class UI {
         arial_80B = new Font("Arial", Font.BOLD,80);
         // OBJ_Key key = new OBJ_Key(gp);
         // keyImage = key.image;
+
+        //CREATE HUD OBJECT
+        Entity heart = new OBJ_Heart(gp);
+        heart_full = heart.image;
+        heart_half = heart.image2;
+        heart_blank = heart.image3;
     }
+
+    
 
     public void showMessage(String text){
         message = text;
@@ -40,23 +51,47 @@ public class UI {
         g2.setColor(Color.white);
 
         if(gp.gameState == gp.titleState){
-            drawTitleScree();
+            drawTitleScreen();
         }
         // PLAY STATE
         if(gp.gameState == gp.playState){
-
+            drawPlayerLife();
         }
         if(gp.gameState == gp.pauseState){
+            drawPlayerLife();
             drawPauseScreen();
         }
         // DIALOGUE STATE
         if(gp.gameState == gp.dialogueState){
+            drawPlayerLife();
             drawDialogueScreen();
         }
         
     }
 
-    public void drawTitleScree() {
+    public void drawPlayerLife() {
+        int x = gp.tileSize / 2;
+        int y = gp.tileSize / 2;
+
+        // Draw hearts (both blank and current life)
+        for (int i = 0; i < gp.player.maxLife / 2; i++) {
+            // Draw the blank heart
+            g2.drawImage(heart_blank, x, y, null);
+            
+            // Draw the current life (full or half)
+            if (i < gp.player.life / 2) {
+                g2.drawImage(heart_full, x, y, null);
+            } else if (i == gp.player.life / 2 && gp.player.life % 2 == 1) {
+                g2.drawImage(heart_half, x, y, null);
+            }
+            
+            x += gp.tileSize;
+        }
+
+    }
+
+
+    public void drawTitleScreen() {
         g2.setColor(new Color(0,0,0));
         g2.fillRect(0, 0, gp.screenWidth, gp.screenHeight);
 
