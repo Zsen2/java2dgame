@@ -7,6 +7,8 @@ import main.UtilityTool;
 import monster.MON_GreenSlime;
 
 import javax.imageio.ImageIO;
+
+import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 
 import java.awt.Rectangle;
@@ -14,27 +16,35 @@ import java.awt.Rectangle;
 public abstract class Entity {
 
     GamePanel gp;
-    public int worldX, worldY;
-    public int speed;
 
     public BufferedImage up1, up2, down1, down2, left1, left2, right1, right2;
-    public String direction = "down";
-
-    public int spriteCounter = 0;
-    public int spriteNum = 1;
-    public Rectangle solidArea = new Rectangle(0, 0, 48, 48);
-    public int solidAreaDefaultX, solidAreaDefaultY;
-    public boolean collisionOn =false;
-    public int actionLockCounter = 0;
-    public boolean invincible = false;
-    public int invincibleCounter = 0;
+    public BufferedImage attackUp1, attackUp2, attackDown1, attackDown2, attackLeft1, attackLeft2, attackRight1, attackRight2;
+    public boolean collision = false;
+    public Rectangle attackArea = new  Rectangle(0,0,0,0);
+    
     String dialogues[] = new String[20];
     int dialogueIndex =0;
     public BufferedImage image, image2, image3;
-    public String name;
-    public boolean collision = false;
 
-    // CHARACTER STATUS
+    public Rectangle solidArea = new Rectangle(0, 0, 48, 48);
+    public int solidAreaDefaultX, solidAreaDefaultY;
+
+    // COUNTERS
+    public int actionLockCounter = 0;
+    public int invincibleCounter = 0;
+    public int spriteCounter = 0;
+
+    // STATE
+    public boolean invincible = false;
+    public int spriteNum = 1;
+    public String direction = "down";
+    public int worldX, worldY;
+    public boolean collisionOn =false;
+    boolean attacking = false;
+
+    // CHARACTER ATTRIBUTES
+    public String name;
+    public int speed;
     public int maxLife;
     public int life;
 
@@ -96,6 +106,14 @@ public abstract class Entity {
             spriteNum = (spriteNum == 1) ? 2 : 1;
             spriteCounter = 0;
         }
+
+        if(invincible){
+            invincibleCounter++;
+            if(invincibleCounter > 40){
+                invincible = false;
+                invincibleCounter =0 ;
+            }
+        }
     }
 
     public void draw(Graphics2D g2){
@@ -115,31 +133,30 @@ public abstract class Entity {
              g2.drawImage(image, screenX, screenY, gp.tileSize, gp.tileSize, null);
 
              switch(direction){
-                case "up":
-                    image = (spriteNum == 1) ? up1 : up2;
-                    break;
-                case "down":
-                    image = (spriteNum == 1) ? down1 : down2;
-                    break;
-                case "left":
-                    image = (spriteNum == 1) ? left1 : left2;
-                    break;
-                case "right":
-                    image = (spriteNum == 1) ? right1 : right2;
-                    break;
+                case "up" -> image = (spriteNum == 1) ? up1 : up2;
+                case "down" -> image = (spriteNum == 1) ? down1 : down2;
+                case "left" -> image = (spriteNum == 1) ? left1 : left2;
+                case "right" -> image = (spriteNum == 1) ? right1 : right2;
+            }
+
+            if (invincible) {
+                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.4f));
             }
     
             g2.drawImage(image, screenX, screenY, null);
+
+            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+
          }
     }
 
-    public BufferedImage setup(String imagePath){
+    public BufferedImage setup(String imagePath, int width, int height){
         UtilityTool uTool = new UtilityTool();
         BufferedImage image = null;
 
         try{
             image = ImageIO.read(getClass().getResourceAsStream(imagePath +".png"));
-            image = uTool.scaleImage(image, gp.tileSize, gp.tileSize);
+            image = uTool.scaleImage(image, width, height);
         }catch(Exception e){
             e.printStackTrace();
         }
