@@ -9,6 +9,7 @@ import monster.MON_GreenSlime;
 import javax.imageio.ImageIO;
 
 import java.awt.AlphaComposite;
+import java.awt.Color;
 import java.awt.Graphics2D;
 
 import java.awt.Rectangle;
@@ -33,6 +34,8 @@ public abstract class Entity {
     public int actionLockCounter = 0;
     public int invincibleCounter = 0;
     public int spriteCounter = 0;
+    int dyingCounter = 0;
+    int hpBarCounter = 0;
 
     // STATE
     public boolean invincible = false;
@@ -41,18 +44,38 @@ public abstract class Entity {
     public int worldX, worldY;
     public boolean collisionOn =false;
     boolean attacking = false;
+    public boolean alive = true;
+    public boolean dying = false;
+    boolean hpBarOn = false;
+
 
     // CHARACTER ATTRIBUTES
     public String name;
     public int speed;
     public int maxLife;
     public int life;
+    public int level;
+    public int strength;
+    public int dexterity;
+    public int attack;
+    public int defense;
+    public int exp;
+    public int nextLevelExp;
+    public int coin;
+    public Entity currentWeapon;
+    public Entity currentShield;
+
+    // ITEM ATTRIBUTES
+    public int attackValue;
+    public int defenseValue;
+    public String description = "";
 
     public Entity(GamePanel gp){
         this. gp = gp;
     }
 
     public void move(){}
+    public void damageReaction(){}
     public void speak(){
         if(dialogues[dialogueIndex] == null){
             dialogueIndex = 0;
@@ -87,7 +110,14 @@ public abstract class Entity {
 
         if(this instanceof MON_GreenSlime && contactPlayer){
             if(!gp.player.invincible){
-                gp.player.life -= 1;
+                gp.playSE(6);
+
+                int damage = attack - gp.player.defense;
+                if(damage < 0){
+                    damage = 0;
+                }
+                gp.player.life -= damage;
+                
                 gp.player.invincible = true;    
             }
         }
@@ -139,8 +169,32 @@ public abstract class Entity {
                 case "right" -> image = (spriteNum == 1) ? right1 : right2;
             }
 
+            // MONSTER HP BAR
+            if(this instanceof MON_GreenSlime && hpBarOn){
+                double oneScale = (double)gp.tileSize/maxLife;
+                double hpBarValue = oneScale*life;
+
+                g2.setColor(new Color(35,35,35));
+                g2.fillRect(screenX-1, screenY-11, gp.tileSize+2, 12);
+                g2.setColor(new Color(255,0,30));
+                g2.fillRect(screenX, screenY-10, (int)hpBarValue, 10);
+
+                hpBarCounter++;
+
+                if(hpBarCounter > 600){
+                    hpBarCounter = 0;
+                    hpBarOn = false;
+                }
+            }
+
             if (invincible) {
+                hpBarOn = true;
+                hpBarCounter = 0;
                 g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.4f));
+            }
+
+            if(dying){
+                dyingAnimation(g2);
             }
     
             g2.drawImage(image, screenX, screenY, null);
@@ -148,6 +202,22 @@ public abstract class Entity {
             g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
 
          }
+    }
+
+    public void dyingAnimation(Graphics2D g2){
+        dyingCounter++;
+
+        int interval = 5;
+        
+        // Change alpha every 5 counts
+        float alpha = (dyingCounter / interval) % 2 == 0 ? 0f : 1f;
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
+
+        if (dyingCounter > 40) {
+            dying = false;
+            alive = false;
+        }
+
     }
 
     public BufferedImage setup(String imagePath, int width, int height){

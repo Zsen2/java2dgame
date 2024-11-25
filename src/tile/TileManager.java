@@ -91,15 +91,16 @@ public class TileManager {
                 int worldY = worldRow * gp.tileSize;
                 int screenX = worldX - gp.player.worldX + gp.player.screenX;
                 int screenY = worldY - gp.player.worldY + gp.player.screenY;
-    
-               
-                if (worldCol < gp.maxWorldCol && worldRow < gp.maxWorldRow) {
-                   
-                    int tileNum = mapTileNum[worldCol][worldRow];
-                    g2.drawImage(tile[tileNum].image, screenX, screenY, null);
-                } else {
-                    g2.setColor(Color.BLACK);  
-                    g2.fillRect(screenX, screenY, gp.tileSize, gp.tileSize); 
+                
+                if (screenX > -gp.tileSize && screenX < gp.screenWidth && screenY > -gp.tileSize && screenY < gp.screenHeight){
+                    if (worldCol < gp.maxWorldCol && worldRow < gp.maxWorldRow) {
+                        int tileNum = mapTileNum[worldCol][worldRow];
+                        g2.drawImage(tile[tileNum].image, screenX, screenY, null);
+                    } 
+                    else {
+                        g2.setColor(Color.BLACK);  
+                        g2.fillRect(screenX, screenY, gp.tileSize, gp.tileSize); 
+                    }
                 }
             }
         }

@@ -87,8 +87,10 @@ public class EventHandler {
     public void healingPool(int col, int row, int gameState){
         if(gp.keyH.spacePressed){
             gp.gameState = gameState;
+            gp.player.attackCancel= true;
             gp.ui.currentDialogue = "You're drinking the water#Your life has been recovered";
             gp.player.life = gp.player.maxLife;
+            gp.aSetter.setMonster();
         }
     }
 

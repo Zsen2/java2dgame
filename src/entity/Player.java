@@ -2,11 +2,14 @@ package entity;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-
+import java.util.ArrayList;
 import java.awt.Rectangle;
 import java.awt.AlphaComposite;
 import main.GamePanel;
 import main.KeyHandler;
+import object.OBJ_Key;
+import object.OBJ_Shield_Wood;
+import object.OBJ_Sword_Normal;
 
 public class Player extends Entity {
     KeyHandler keyH;
@@ -14,6 +17,9 @@ public class Player extends Entity {
     public final int screenX;
     public final int screenY;
     public int damageCooldown = 0;
+    public boolean attackCancel = false;
+    public ArrayList<Entity> inventory = new ArrayList<>();
+    public final int maxInventorySize = 20;
 
     public Player(GamePanel gp, KeyHandler keyH){
 
@@ -33,6 +39,7 @@ public class Player extends Entity {
         setDefaultValues();
         getPlayerImage();
         getPlayerAttackImage();
+        setItems();
     }
 
     public void setDefaultValues(){
@@ -42,8 +49,35 @@ public class Player extends Entity {
         direction = "down";
 
         // PLAYER STATUS
+        level = 1;
         maxLife = 6;
         life = maxLife;
+        strength = 1;
+        dexterity = 1;
+        exp = 0;
+        nextLevelExp = 5;
+        coin = 0;
+        currentWeapon = new OBJ_Sword_Normal(gp);
+        currentShield = new OBJ_Shield_Wood(gp);
+        attack = getAttack();
+        defense = getDefense();
+    }
+
+    public void setItems(){
+        inventory.add(currentWeapon);
+        inventory.add(currentShield);
+        inventory.add(new OBJ_Key(gp));
+        inventory.add(new OBJ_Key(gp));
+        
+
+    }
+
+    public int getAttack(){
+        return attack = strength * currentWeapon.attackValue;
+    }
+
+    public int getDefense(){
+        return defense = dexterity * currentShield.defenseValue;
     }
 
     public void getPlayerImage(){
@@ -100,6 +134,12 @@ public class Player extends Entity {
                     case "right" -> worldX += speed;
                 }
             }
+            if(keyH.spacePressed && !attackCancel){
+                attacking = true;
+                spriteCounter = 0;
+            }
+            attackCancel = false;
+
             gp.keyH.spacePressed = false; 
         }
         else{
@@ -150,24 +190,61 @@ public class Player extends Entity {
     }
 
     public void contactMonster(int i) {
-        if(i != 999){
-            if(!invincible){
-                life -= 1;
-                invincible = true;
-            }
+        if(i == 999 || invincible){
+            return;
         }
+
+        Entity monster = gp.monster[i];
+
+        gp.playSE(6);
+
+        int damage = monster.attack - defense;
+        if(damage < 0){
+            damage = 0;
+        }
+        life -= damage;
+        invincible = true;
     }
 
     public void damageMonster(int i) {
-        if(i != 999){
-            if(!gp.monster[i].invincible){
-                gp.monster[i].life -= 1;
-                gp.monster[i].invincible = true;
+        if(i == 999 || gp.monster[i].invincible) {
+            return;
+        }
+    
+        Entity monster = gp.monster[i];
+    
+        gp.playSE(5);
+    
+        int damage = Math.max(attack - monster.defense, 0);
+        monster.life -= damage;
+        gp.ui.addMessage(damage + " damage!");
+    
+        monster.damageReaction();
+    
+        monster.invincible = true;
+    
+        if(monster.life <= 0) {
+            monster.dying = true;
+            gp.ui.addMessage("Killed the " + monster.name + "!");
+            gp.ui.addMessage("Exp + " + monster.exp);
+            exp += monster.exp;
+            checkLevelUp();
+        }
+    }
 
-                if(gp.monster[i].life <= 0){
-                    gp.monster[i] = null;
-                }
-            }
+    public void checkLevelUp() {
+        if(exp >= nextLevelExp){
+            level++;
+            nextLevelExp *= 2;
+            maxLife += 2;
+            strength++;
+            dexterity++;
+            attack = getAttack();
+            defense = getDefense();
+
+            gp.playSE(8);
+            gp.gameState = gp.dialogueState;
+            gp.ui.currentDialogue = "You leveled up!";
         }
     }
 
@@ -201,17 +278,14 @@ public class Player extends Entity {
         }
     }
 
-    public void interactNPC(int i){
-        if(gp.keyH.spacePressed){
-            if(i != 999){
-                gp.gameState = gp.dialogueState;
-                gp.npc[i].speak();
-            }
-            else{
-                attacking = true;
-            }
+    public void interactNPC(int i) {
+        if(i == 999 || !gp.keyH.spacePressed) {
+            return;
         }
         
+        attackCancel = true;
+        gp.gameState = gp.dialogueState;
+        gp.npc[i].speak();
     }
 
     @Override

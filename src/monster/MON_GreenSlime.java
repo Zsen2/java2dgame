@@ -18,6 +18,9 @@ public class MON_GreenSlime extends Entity{
         speed = 1;
         maxLife = 3;
         life = maxLife;
+        attack = 5;
+        defense = 0;
+        exp = 2;
 
         solidArea.x = 3;
         solidArea.y = 18;
@@ -62,6 +65,11 @@ public class MON_GreenSlime extends Entity{
     
     public void update(){
         super.update();
+    }
+
+    public void damageReaction(){
+        actionLockCounter =0;
+        direction = gp.player.direction;
     }
 
     
